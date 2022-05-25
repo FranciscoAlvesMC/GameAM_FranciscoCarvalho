@@ -19,7 +19,6 @@ const player = {
 
 //adicionar inimigos????
 
-//Digas do Daniel>> Niveis
 
 const playerSprite= new Image();
 playerSprite.src = "girl.png";
