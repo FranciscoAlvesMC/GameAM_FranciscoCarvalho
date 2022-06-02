@@ -18,12 +18,16 @@ const player = {
 };
 
 //adicionar inimigos????
-
+//
 
 const playerSprite= new Image();
 playerSprite.src = "girl.png";
 const background = new Image();
 background.src = "background.png";
+
+const playerSpriteInimigo= new Image();
+playerSprite.src = "girl.png";
+
 
 function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
     ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
