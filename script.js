@@ -117,10 +117,30 @@ function getDistance(x1, y1, x2, y2){
 }
 
 var score=0;
-
+var delay=10;
+const danoPow= new Image();
+danoPow.src = "POW.png";
 function collision(projectiles){
     arrayInimigos.some((enemy)=>{
-         projectiles.some((projectile)=>{
+        if(getDistance(player.x, player.y, enemy.x+20, enemy.y+20) < enemy.width/2 + player.width/2){
+            if(delay<0)
+                delay = 10;
+
+            if(delay == 10) {
+                console.log("Colisão com player");
+                drawSprite(danoPow, 0, 0, player.width, player.height, player.x, player.y, player.width, player.height);
+            
+                player.health-=1;
+            }
+            console.log("delay " + delay);
+            delay--;
+        }
+        
+        if(player.health <= 0){
+            alert("Morreste!!! --> prima F5");
+        };
+
+        projectiles.some((projectile)=>{
             if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
                 console.log("Colisão com Projétil");
                 //Remove o Inimigo
