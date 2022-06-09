@@ -1,9 +1,22 @@
+/*Francisco_Carvalho_190100146*/
+body {
+    background-color: #626262;
+    }
+
+.h1 {
+    color: orange;
+}
+
+.h2 {
+    color: orange;
+}
+
 #canvas1 {
     width: 800px;
     height: 500px;
     border: 1ox solid black;
-    background: orange;
-    background-image: url();
+    /*background: orange;*/
+    background-image: url(ArenaMC.png);
     position: absolute;
     top: 50%;
     left: 50%;
