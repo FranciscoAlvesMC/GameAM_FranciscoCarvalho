@@ -5,7 +5,9 @@ canvas.height = 500;
 
 const keys = [];
 var dir = 0;
-const projectiles = []
+const projectiles = [];
+
+var arrayInimigos = [];
 
 const player = {
     x: 200,
@@ -17,33 +19,77 @@ const player = {
     speed: 10
 };
 
-//adicionar inimigos????
-//
+
+class PlayerInimigo {
+    constructor(x, y, width, height, frameX, frameY, speed, src) {
+        var image = new Image();
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.height=height;
+        this.frameX=frameX;
+        this.frameY=frameY;
+        this.speed=speed;
+        this.image = image;
+        this.image.src=src;
+    }
+    
+};
+
 
 const playerSprite= new Image();
 playerSprite.src = "girl.png";
 const background = new Image();
 background.src = "background.png";
 
-const playerSpriteInimigo= new Image();
-playerSprite.src = "girl.png";
+// var image = new Image();
+// image.src = "girl.png";
 
+//adicionar inimigos
+for(var i=0;i<10;i++)
+    arrayInimigos.push(new PlayerInimigo(
+        Math.random()*(canvas.width-50), 
+        Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, "inimigo3.png"));
 
 function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
     ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
 
 }
 
+
+
 function animate(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
     //ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
     drawSprite(playerSprite, 48*player.frameX, 48*player.frameY, player.width, player.height, player.x, player.y, player.width, player.height);
-   
     requestAnimationFrame(animate); 
+    collision(projectiles);
+    
     
     var index =-1;
+    arrayInimigos.forEach(inimigo => 
+        {
+            drawSprite(inimigo.image, 48*inimigo.frameX, 48*inimigo.frameY, inimigo.width, inimigo.height, inimigo.x, inimigo.y, inimigo.width, inimigo.height);
+            if(Math.random() > 0.94 ){
+                if(Math.random() > 0.5){
+                    var tempX = inimigo.x + (Math.random() > 0.5 ? 2.5*inimigo.speed : -2.5*inimigo.speed);
+                    if (tempX < canvas.width-50 && tempX > 0){
+                        inimigo.x = tempX;
+                    } 
+                    
+                } else {
+
+                    var tempY = inimigo.y + (Math.random() > 0.5 ? 2.5*inimigo.speed : -2.5*inimigo.speed);
+                    if (tempY < canvas.height-50 && tempY > 0){
+                        inimigo.y = tempY;
+                    } 
+                }    
+            }
+        }
+    );
+    
     projectiles.forEach(projectile => {
-        projectile.update()
+        projectile.update();
         if(projectile.position.x >= canvas.width || projectile.position.x <=0 || projectile.position.y >= canvas.height || projectile.position.y <= 0){
             index = projectiles.indexOf(projectile);
             
@@ -52,11 +98,53 @@ function animate(){
     if(index != -1)
         projectiles.splice(index, 1);
 }
+
+function getDistance(x1, y1, x2, y2){
+    let xDistance = x2 - x1;
+    let yDistance = y2 - y1;
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+}
+
+var score=0;
+
+function collision(projectiles){
+    arrayInimigos.some((enemy)=>{
+         projectiles.some((projectile)=>{
+            // console.log("projectile1 " + getDistance(projectile.position.x, projectile.position.y, enemy.x, enemy.y) +
+            //  " < "+ enemy.x + " m "+ enemy.width/2 +" , "+ projectile.width/2);
+            if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
+                console.log("Colisão com Projétil");
+                //console.log("Tamanho inicial do array enemies: " + enemies.length);
+                //Remove o Inimigo
+                arrayInimigos.splice(arrayInimigos.indexOf(enemy),1);
+                //Remove o Projétil 
+                projectiles.splice(projectiles.indexOf(projectile), 1);
+                //console.log("Tamanho final do array enemies: " + enemies.length);
+                
+                score += 100;
+                enemy.image.src = "";
+                document.getElementById("Score").innerHTML = "SCORE: " + score;
+
+                if(arrayInimigos.length == 0) {
+                    //console.log("YOU WIN!!!!");
+                    if (window.confirm("YOU WIN!!!!")) {
+                        document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
+                      } else {
+                        document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
+                      }
+
+
+                };
+            }
+         });
+    });
+}
+
 animate();
 
 window.addEventListener("keydown", function(e){
     keys[e.keyCode] = true;
-    console.log("keydown " + e.keyCode + ", keys:: "+ keys);
+    // console.log("keydown " + e.keyCode + ", keys:: "+ keys);
     movePlayer();
     firedBall();
 
@@ -93,9 +181,6 @@ class Projectile {
         this.position.x += this.velocity.x * 10
         this.position.y += this.velocity.y * 10
 
-        
-
-
     }
 }
 
@@ -115,12 +200,11 @@ function firedBall(){
 
 window.addEventListener("keyup", function(e){
     delete keys[e.keyCode];
-    console.log("keyup "+ ", keys:: "+ keys);
+    // console.log("keyup "+ ", keys:: "+ keys);
 });
 
 function movePlayer(){
-    console.log("move " + projectiles);
-   
+    // console.log("move " + projectiles);
     if (keys[38] && player.y > 20){ //cima
         player.y -= player.speed;
         player.frameX += 1;
