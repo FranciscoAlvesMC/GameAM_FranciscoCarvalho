@@ -1,4 +1,4 @@
-/*Francisco_Carvalho_190100146*/
+/*Francisco_Carvalho_190100146    <nova data limite dia 15 9:30>*/ 
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
@@ -18,15 +18,17 @@ const player = {
     height: 48 ,
     frameX: 0,
     frameY: 0,
-    speed: 10
+    speed: 10,
+    health:20,
 };
 
 
 class PlayerInimigo {
-    constructor(x, y, width, height, frameX, frameY, speed, src) {
+    constructor(x, y, width, height, frameX, frameY, speed, health, src) {
         var image = new Image();
         this.x=x;
         this.y=y;
+        this.health=health;
         this.width=width;
         this.height=height;
         this.frameX=frameX;
@@ -34,36 +36,39 @@ class PlayerInimigo {
         this.speed=speed;
         this.image = image;
         this.image.src=src;
+
     }
     
 };
-
 
 const playerSprite= new Image();
 playerSprite.src = "girl.png";
 const background = new Image();
 background.src = "background.png";
 
-// var image = new Image();
-// image.src = "girl.png";
-
 //adicionar inimigos e pode alterar o nº de inimigos
-for(var i=0;i<10;i++)
+var numberOfEnemies = 2;
+for(var i=0;i<numberOfEnemies;i++)
     arrayInimigos.push(new PlayerInimigo(
         Math.random()*(canvas.width-50), 
-        Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, "inimigo3.png"));
+        Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, 2, "inimigo3.png"));
 
 function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
     ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
 
 }
 
-
+var ctxPlayer = canvas.getContext("2d");
 
 function animate(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    //ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
     drawSprite(playerSprite, 48*player.frameX, 48*player.frameY, player.width, player.height, player.x, player.y, player.width, player.height);
+    
+    
+    ctxPlayer.font = "15px Arial";
+    ctxPlayer.fillStyle = "white";
+    ctxPlayer.fillText("HP: "+player.health, player.x, player.y);
+
     requestAnimationFrame(animate); 
     collision(projectiles);
     
@@ -87,6 +92,10 @@ function animate(){
                     } 
                 }    
             }
+            var ctx = canvas.getContext("2d");
+            ctx.font = "15px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("HP: "+inimigo.health, inimigo.x, inimigo.y);
         }
     );
     
@@ -109,90 +118,22 @@ function getDistance(x1, y1, x2, y2){
 
 var score=0;
 
-/*
-
-    // Update the game state
-
-    function update(tframe) {
-        var dt = (tframe - lastframe) / 1000;
-        lastframe = tframe;
-
-        // Update the fps counter
-        updateFps(dt);
-
-        if (gamestate == gamestates.ready) {
-
-            // Game is ready for player input
-
-        } else if (gamestate == gamestates.shootbubble) {
-
-            // Bubble is moving
-
-            stateShootBubble(dt);
-
-        } else if (gamestate == gamestates.removecluster) {
-
-            // Remove cluster and drop tiles
-
-            stateRemoveCluster(dt);
-        }
-    }
-
-    function setGameState(newgamestate) {
-
-        gamestate = newgamestate;
-        animationstate = 0;
-        animationtime = 0;
-    }
-
-    function stateShootBubble(dt) {
-
-
-        player.bubble.x += dt * player.bubble.speed * Math.cos(degToRad(player.bubble.angle));
-
-        player.bubble.y += dt * player.bubble.speed * -1*Math.sin(degToRad(player.bubble.angle));
-
-        if (player.bubble.x <= level.x) {
-
-            // Left edge
-            player.bubble.angle = 180 - player.bubble.angle;
-            player.bubble.x = level.x;
-
-        } else if (player.bubble.x + level.tilewidth >= level.x + level.width) {
-
-            // Right edge
-            player.bubble.angle = 180 - player.bubble.angle;
-            player.bubble.x = level.x + level.width - level.tilewidth;
-
-        }
-
-        // Collisions with the top of the level
-
-        if (player.bubble.y <= level.y) {
-
-            // Top collision
-            player.bubble.y = level.y;
-            snapBubble();
-            return;
-        } 
-*/
-
 function collision(projectiles){
     arrayInimigos.some((enemy)=>{
          projectiles.some((projectile)=>{
-            // console.log("projectile1 " + getDistance(projectile.position.x, projectile.position.y, enemy.x, enemy.y) +
-            //  " < "+ enemy.x + " m "+ enemy.width/2 +" , "+ projectile.width/2);
             if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
                 console.log("Colisão com Projétil");
-                //console.log("Tamanho inicial do array enemies: " + enemies.length);
                 //Remove o Inimigo
-                arrayInimigos.splice(arrayInimigos.indexOf(enemy),1);
+                console.log('enemy.health '+ enemy.health);
+                enemy.health-=1;
+                if (enemy.health == 0){
+                    console.log('1 enemy.health '+ enemy.health);
+                    arrayInimigos.splice(arrayInimigos.indexOf(enemy),1);
+                    enemy.image.src = "";
+                    score += 100;
+                }
                 //Remove o Projétil 
-                projectiles.splice(projectiles.indexOf(projectile), 1);
-                //console.log("Tamanho final do array enemies: " + enemies.length);
-                
-                score += 100;
-                enemy.image.src = "";
+                projectiles.splice(projectiles.indexOf(projectile), 1);              
                 document.getElementById("Score").innerHTML = "SCORE: " + score;
 
                 if(arrayInimigos.length == 0) {
