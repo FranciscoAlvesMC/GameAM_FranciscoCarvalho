@@ -129,7 +129,7 @@ function collision(projectiles){
 
                 if(arrayInimigos.length == 0) {
                     //console.log("YOU WIN!!!!");
-                    if (window.confirm("YOU WIN!!!!")) {
+                    if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
                         document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
                       } else {
                         document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
