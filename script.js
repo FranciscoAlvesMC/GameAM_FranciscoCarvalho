@@ -47,7 +47,7 @@ background.src = "background.png";
 // var image = new Image();
 // image.src = "girl.png";
 
-//adicionar inimigos
+//adicionar inimigos e pode alterar o nº de inimigos
 for(var i=0;i<10;i++)
     arrayInimigos.push(new PlayerInimigo(
         Math.random()*(canvas.width-50), 
