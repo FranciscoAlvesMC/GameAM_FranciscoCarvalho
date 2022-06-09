@@ -109,6 +109,74 @@ function getDistance(x1, y1, x2, y2){
 
 var score=0;
 
+/*
+
+    // Update the game state
+
+    function update(tframe) {
+        var dt = (tframe - lastframe) / 1000;
+        lastframe = tframe;
+
+        // Update the fps counter
+        updateFps(dt);
+
+        if (gamestate == gamestates.ready) {
+
+            // Game is ready for player input
+
+        } else if (gamestate == gamestates.shootbubble) {
+
+            // Bubble is moving
+
+            stateShootBubble(dt);
+
+        } else if (gamestate == gamestates.removecluster) {
+
+            // Remove cluster and drop tiles
+
+            stateRemoveCluster(dt);
+        }
+    }
+
+    function setGameState(newgamestate) {
+
+        gamestate = newgamestate;
+        animationstate = 0;
+        animationtime = 0;
+    }
+
+    function stateShootBubble(dt) {
+
+
+        player.bubble.x += dt * player.bubble.speed * Math.cos(degToRad(player.bubble.angle));
+
+        player.bubble.y += dt * player.bubble.speed * -1*Math.sin(degToRad(player.bubble.angle));
+
+        if (player.bubble.x <= level.x) {
+
+            // Left edge
+            player.bubble.angle = 180 - player.bubble.angle;
+            player.bubble.x = level.x;
+
+        } else if (player.bubble.x + level.tilewidth >= level.x + level.width) {
+
+            // Right edge
+            player.bubble.angle = 180 - player.bubble.angle;
+            player.bubble.x = level.x + level.width - level.tilewidth;
+
+        }
+
+        // Collisions with the top of the level
+
+        if (player.bubble.y <= level.y) {
+
+            // Top collision
+            player.bubble.y = level.y;
+            snapBubble();
+            return;
+        } 
+*/
+
 function collision(projectiles){
     arrayInimigos.some((enemy)=>{
          projectiles.some((projectile)=>{
