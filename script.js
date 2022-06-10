@@ -8,9 +8,25 @@ canvas.height = 500;
 const keys = [];
 var dir = 0;
 const projectiles = [];
+var score=0;
+var delay=10;
+const danoPow= new Image();
+danoPow.src = "POW.png";
 
 var arrayInimigos = [];
 
+var difficultyMode;
+
+const playerSprite= new Image();
+playerSprite.src = "girl.png";
+const background = new Image();
+background.src = "background.png";
+
+//adicionar inimigos e pode alterar o nº de inimigos
+var numberOfEnemies;
+var projectilesEnemy = [];
+
+var ctxPlayer = canvas.getContext("2d");
 const player = {
     x: 200,
     y: 200,
@@ -22,45 +38,66 @@ const player = {
     health:20,
 };
 
-
 class PlayerInimigo {
-    constructor(x, y, width, height, frameX, frameY, speed, health, src) {
+    constructor(x, y, width, height, frameX, frameY, speed, health, src, projectiles) {
         var image = new Image();
-        this.x=x;
-        this.y=y;
-        this.health=health;
-        this.width=width;
-        this.height=height;
-        this.frameX=frameX;
-        this.frameY=frameY;
-        this.speed=speed;
+        this.x = x;
+        this.y = y;
+        this.health = health;
+        this.width = width;
+        this.height = height;
+        this.frameX = frameX;
+        this.frameY = frameY;
+        this.speed = speed;
         this.image = image;
-        this.image.src=src;
-
+        this.image.src = src;
+        this.projectiles = projectiles;
     }
-    
 };
-
-const playerSprite= new Image();
-playerSprite.src = "girl.png";
-const background = new Image();
-background.src = "background.png";
-
-//adicionar inimigos e pode alterar o nº de inimigos
-var numberOfEnemies = 2;
-for(var i=0;i<numberOfEnemies;i++)
-    arrayInimigos.push(new PlayerInimigo(
-        Math.random()*(canvas.width-50), 
-        Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, 2, "inimigo3.png"));
 
 function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
     ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
 
 }
-
-var ctxPlayer = canvas.getContext("2d");
-
+var init=0;
+var healthEnemy;
 function animate(){
+    if(init==0)
+    {  
+        let text;
+        let person = prompt("Escolha a dificuldade: 1=EASY 2=MEDIUM 3=HARDCORE", "1");
+        if (person == null || person == "") {
+            text = "ficou por defeito -> EASY";
+            difficultyMode = 1;
+        } else {
+            text = "Escolheu a dificuldade " + person;
+        }
+        document.getElementById("Dificuldade").innerHTML = text;
+        
+        switch(person){
+            case '2':
+                healthEnemy=10;
+                numberOfEnemies=8;
+                player.health=15;
+            break;
+            case '3':
+                healthEnemy=20;
+                numberOfEnemies=15;
+                player.health=10;
+            break;
+            default:
+                healthEnemy=2;
+                numberOfEnemies=5;
+            break;
+        }
+
+        for(var i=0;i<numberOfEnemies;i++){
+        arrayInimigos.push(new PlayerInimigo(
+            Math.random()*(canvas.width-50), 
+            Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, healthEnemy, "inimigo3.png", []));
+        }
+    }
+    init++;
     ctx.clearRect(0,0,canvas.width, canvas.height);
     drawSprite(playerSprite, 48*player.frameX, 48*player.frameY, player.width, player.height, player.x, player.y, player.width, player.height);
     
@@ -92,13 +129,30 @@ function animate(){
                     } 
                 }    
             }
+
+            //Vida inimigo
             var ctx = canvas.getContext("2d");
             ctx.font = "15px Arial";
             ctx.fillStyle = "white";
             ctx.fillText("HP: "+inimigo.health, inimigo.x, inimigo.y);
+
+            //projectiles inimigo
+            
+            inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));
+            
+            //refresh projectiles inimigo
+            inimigo.projectiles.forEach(projectile => {
+                projectile.update();
+                if(projectile.position.x >= canvas.width || projectile.position.x <=0 || projectile.position.y >= canvas.height || projectile.position.y <= 0){
+                    index = projectiles.indexOf(projectile);
+                    
+                }
+            });
         }
+
     );
     
+    //player projectiles
     projectiles.forEach(projectile => {
         projectile.update();
         if(projectile.position.x >= canvas.width || projectile.position.x <=0 || projectile.position.y >= canvas.height || projectile.position.y <= 0){
@@ -116,71 +170,12 @@ function getDistance(x1, y1, x2, y2){
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 }
 
-var score=0;
-var delay=10;
-const danoPow= new Image();
-danoPow.src = "POW.png";
-function collision(projectiles){
-    arrayInimigos.some((enemy)=>{
-        if(getDistance(player.x, player.y, enemy.x+20, enemy.y+20) < enemy.width/2 + player.width/2){
-            if(delay<0)
-                delay = 10;
-
-            if(delay == 10) {
-                console.log("Colisão com player");
-                drawSprite(danoPow, 0, 0, player.width, player.height, player.x, player.y, player.width, player.height);
-            
-                player.health-=1;
-            }
-            console.log("delay " + delay);
-            delay--;
-        }
-        
-        if(player.health <= 0){
-            alert("Morreste!!! --> prima F5");
-        };
-
-        projectiles.some((projectile)=>{
-            if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
-                console.log("Colisão com Projétil");
-                //Remove o Inimigo
-                console.log('enemy.health '+ enemy.health);
-                enemy.health-=1;
-                if (enemy.health == 0){
-                    console.log('1 enemy.health '+ enemy.health);
-                    arrayInimigos.splice(arrayInimigos.indexOf(enemy),1);
-                    enemy.image.src = "";
-                    score += 100;
-                }
-                //Remove o Projétil 
-                projectiles.splice(projectiles.indexOf(projectile), 1);              
-                document.getElementById("Score").innerHTML = "SCORE: " + score;
-
-                if(arrayInimigos.length == 0) {
-                    //console.log("YOU WIN!!!!");
-                    if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
-                        document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
-                      } else {
-                        document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
-                      }
-
-
-                };
-            }
-         });
-    });
-}
-
-animate();
-
 window.addEventListener("keydown", function(e){
     keys[e.keyCode] = true;
-    // console.log("keydown " + e.keyCode + ", keys:: "+ keys);
     movePlayer();
     firedBall();
 
 });
-
 
 class Projectile {
     constructor(x,y, velocityX, velocityY) {
@@ -231,11 +226,9 @@ function firedBall(){
 
 window.addEventListener("keyup", function(e){
     delete keys[e.keyCode];
-    // console.log("keyup "+ ", keys:: "+ keys);
 });
 
 function movePlayer(){
-    // console.log("move " + projectiles);
     if (keys[38] && player.y > 20){ //cima
         player.y -= player.speed;
         player.frameX += 1;
@@ -264,3 +257,50 @@ function movePlayer(){
         player.frameX = 0;
     }
 }
+
+function collision(projectiles){
+    arrayInimigos.some((enemy)=>{
+        if(getDistance(player.x, player.y, enemy.x+20, enemy.y+20) < enemy.width/2 + player.width/2){
+            if(delay<0)
+                delay = 10;
+
+            if(delay == 10) {
+                drawSprite(danoPow, 0, 0, player.width, player.height, player.x, player.y, player.width, player.height);
+                player.health-=1;
+            }
+            delay--;
+        }
+        
+        if(player.health <= 0){
+            alert("Morreste!!! --> prima F5");
+        };
+
+        projectiles.some((projectile)=>{
+            if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
+                //Remove o Inimigo
+                enemy.health-=1;
+                if (enemy.health == 0){
+                    arrayInimigos.splice(arrayInimigos.indexOf(enemy),1);
+                    enemy.image.src = "";
+                    score += 100;
+                }
+                //Remove o Projétil 
+                projectiles.splice(projectiles.indexOf(projectile), 1);              
+                document.getElementById("Score").innerHTML = "SCORE: " + score;
+        
+                if(arrayInimigos.length == 0) {
+                    if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
+                        document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
+                      } else {
+                        document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
+                      }
+
+
+                };
+            }
+         });
+    });
+}
+
+//Executa
+animate();
