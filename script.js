@@ -7,7 +7,7 @@ canvas.height = 500;
 
 const keys = [];
 var dir = 0;
-const projectiles = [];
+const playerProjectiles = [];
 var score=0;
 var delay=10;
 const danoPow= new Image();
@@ -38,8 +38,10 @@ const player = {
     health:20,
 };
 
+var atraso = 35;
+
 class PlayerInimigo {
-    constructor(x, y, width, height, frameX, frameY, speed, health, src, projectiles) {
+    constructor(x, y, width, height, frameX, frameY, speed, health, src, projectiles, delay=atraso) {
         var image = new Image();
         this.x = x;
         this.y = y;
@@ -52,6 +54,7 @@ class PlayerInimigo {
         this.image = image;
         this.image.src = src;
         this.projectiles = projectiles;
+        this.delay=delay;
     }
 };
 
@@ -107,7 +110,7 @@ function animate(){
     ctxPlayer.fillText("HP: "+player.health, player.x, player.y);
 
     requestAnimationFrame(animate); 
-    collision(projectiles);
+    collision(playerProjectiles);
     
     
     var index =-1;
@@ -137,14 +140,39 @@ function animate(){
             ctx.fillText("HP: "+inimigo.health, inimigo.x, inimigo.y);
 
             //projectiles inimigo
+
+            if (player.y >= inimigo.y-20 && player.y <= inimigo.y+20){
+                if(inimigo.delay<0)
+                    inimigo.delay = atraso;
+                  
+                if(inimigo.delay == atraso) {  
+                    if(player.x >= inimigo.x)
+                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 1, 0));
+                    else
+                      inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, -1, 0));
+                }
+                      inimigo.delay--;
+            }; 
+            if (player.x >= inimigo.x-20 && player.x <= inimigo.x+20){
+                if(inimigo.delay<0)
+                    inimigo.delay = atraso;
+
+                if(inimigo.delay == atraso) {
+                  if( player.y >= inimigo.y)
+                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, 1));
+                    else
+                     inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));
+                }
+                     inimigo.delay--;
+                     console.log('delay '+ inimigo.delay);
+            };
             
-            inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));
-            
+
             //refresh projectiles inimigo
             inimigo.projectiles.forEach(projectile => {
                 projectile.update();
                 if(projectile.position.x >= canvas.width || projectile.position.x <=0 || projectile.position.y >= canvas.height || projectile.position.y <= 0){
-                    index = projectiles.indexOf(projectile);
+                    index = playerProjectiles.indexOf(projectile);
                     
                 }
             });
@@ -153,15 +181,15 @@ function animate(){
     );
     
     //player projectiles
-    projectiles.forEach(projectile => {
+    playerProjectiles.forEach(projectile => {
         projectile.update();
         if(projectile.position.x >= canvas.width || projectile.position.x <=0 || projectile.position.y >= canvas.height || projectile.position.y <= 0){
-            index = projectiles.indexOf(projectile);
+            index = playerProjectiles.indexOf(projectile);
             
         }
     });
     if(index != -1)
-        projectiles.splice(index, 1);
+        playerProjectiles.splice(index, 1);
 }
 
 function getDistance(x1, y1, x2, y2){
@@ -204,8 +232,8 @@ class Projectile {
     update() {
         this.draw()
 
-        this.position.x += this.velocity.x * 10
-        this.position.y += this.velocity.y * 10
+        this.position.x += this.velocity.x * 5
+        this.position.y += this.velocity.y * 5
 
     }
 }
@@ -213,13 +241,13 @@ class Projectile {
 function firedBall(){
     if (keys[32]){
         if(dir == 38)
-            projectiles.push(new Projectile(player.x, player.y, 0, -1))
+            playerProjectiles.push(new Projectile(player.x, player.y, 0, -1))
         if(dir == 40)
-            projectiles.push(new Projectile(player.x, player.y, 0, 1))
+            playerProjectiles.push(new Projectile(player.x, player.y, 0, 1))
         if(dir == 37)
-            projectiles.push(new Projectile(player.x, player.y, -1, 0))
+            playerProjectiles.push(new Projectile(player.x, player.y, -1, 0))
         if(dir == 39)
-            projectiles.push(new Projectile(player.x, player.y, 1, 0))
+            playerProjectiles.push(new Projectile(player.x, player.y, 1, 0))
     }
 
 }
@@ -258,7 +286,7 @@ function movePlayer(){
     }
 }
 
-function collision(projectiles){
+function collision(playerProjectiles){
     arrayInimigos.some((enemy)=>{
         if(getDistance(player.x, player.y, enemy.x+20, enemy.y+20) < enemy.width/2 + player.width/2){
             if(delay<0)
@@ -275,7 +303,15 @@ function collision(projectiles){
             alert("Morreste!!! --> prima F5");
         };
 
-        projectiles.some((projectile)=>{
+        enemy.projectiles.some((projectile)=>{
+            if (getDistance(projectile.position.x, projectile.position.y, player.x+20, player.y+20) < player.width/2 + projectile.radius) {
+                player.health-=1;
+                enemy.projectiles.splice(enemy.projectiles.indexOf(projectile), 1); 
+            }
+        })
+
+        //projetile player
+        playerProjectiles.some((projectile)=>{
             if(getDistance(projectile.position.x, projectile.position.y, enemy.x+20, enemy.y+20) < enemy.width/2 + projectile.radius){
                 //Remove o Inimigo
                 enemy.health-=1;
@@ -285,7 +321,7 @@ function collision(projectiles){
                     score += 100;
                 }
                 //Remove o Projétil 
-                projectiles.splice(projectiles.indexOf(projectile), 1);              
+                playerProjectiles.splice(playerProjectiles.indexOf(projectile), 1);              
                 document.getElementById("Score").innerHTML = "SCORE: " + score;
         
                 if(arrayInimigos.length == 0) {
