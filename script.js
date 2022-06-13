@@ -26,6 +26,14 @@ background.src = "background.png";
 var numberOfEnemies;
 var projectilesEnemy = [];
 
+const portallvl = {
+    nivel: 1,
+    x: 730,
+    y: 250,
+    width:39,
+    height:70,
+};
+
 var ctxPlayer = canvas.getContext("2d");
 const player = {
     x: 200,
@@ -58,6 +66,7 @@ class PlayerInimigo {
     }
 };
 
+
 function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
     ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
 
@@ -68,16 +77,17 @@ function animate(){
     if(init==0)
     {  
         let text;
-        let person = prompt("Escolha a dificuldade: 1=EASY 2=MEDIUM 3=HARDCORE", "1");
-        if (person == null || person == "") {
+        let diff = prompt("Escolha a dificuldade: 1=EASY 2=MEDIUM 3=HARDCORE", "1");
+        if (diff == null || diff == "") {
             text = "ficou por defeito -> EASY";
-            difficultyMode = 1;
+            difficultyMode = '1';
         } else {
-            text = "Escolheu a dificuldade " + person;
+            text = "Escolheu a dificuldade " + diff;
+            difficultyMode = diff;
         }
         document.getElementById("Dificuldade").innerHTML = text;
         
-        switch(person){
+        switch(difficultyMode){
             case '2':
                 healthEnemy=10;
                 numberOfEnemies=8;
@@ -90,7 +100,7 @@ function animate(){
             break;
             default:
                 healthEnemy=2;
-                numberOfEnemies=5;
+                numberOfEnemies=1;
             break;
         }
 
@@ -100,6 +110,11 @@ function animate(){
             Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, healthEnemy, "inimigo3.png", []));
         }
     }
+
+
+
+
+
     init++;
     ctx.clearRect(0,0,canvas.width, canvas.height);
     drawSprite(playerSprite, 48*player.frameX, 48*player.frameY, player.width, player.height, player.x, player.y, player.width, player.height);
@@ -285,6 +300,8 @@ function movePlayer(){
         player.frameX = 0;
     }
 }
+var portalImage = new Image();
+portalImage.src = "Portal2.png";
 
 function collision(playerProjectiles){
     arrayInimigos.some((enemy)=>{
@@ -324,18 +341,65 @@ function collision(playerProjectiles){
                 playerProjectiles.splice(playerProjectiles.indexOf(projectile), 1);              
                 document.getElementById("Score").innerHTML = "SCORE: " + score;
         
-                if(arrayInimigos.length == 0) {
-                    if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
-                        document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
-                      } else {
-                        document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
-                      }
-
-
-                };
             }
-         });
+        });
+        //Verifica niveis e todos os inimigos mortos
     });
+
+    if(arrayInimigos.length == 0 && portallvl.nivel == 3) {
+        //Fim do ultimo nivel
+        if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
+            document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
+          } else {
+            document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
+          }
+    }else if(arrayInimigos.length == 0){
+        //Fim nivel e aparece porta
+       
+        if(getDistance(player.x, player.y, portallvl.x, portallvl.y) < portallvl.width/2 + player.width/2){
+            console.log('PORTAL DESENHOU');
+            //adicionar o nivel
+            portallvl.nivel++;
+            
+            //reset nivel (, trocar imagem fundo e boss?, mostrar nivel)
+            switch(difficultyMode){
+                //medium
+                case '2':
+                    healthEnemy=10;
+                    if(portallvl.nivel==3)
+                        numberOfEnemies=1;
+                    else
+                        numberOfEnemies=8*portallvl.nivel;
+                break;
+                //hard
+                case '3':
+                    healthEnemy=20;
+                    numberOfEnemies=15*portallvl.nivel;
+                break;
+                //easy
+                default:
+                    healthEnemy=2;
+                    numberOfEnemies=1*portallvl.nivel;
+                break;
+            }
+            
+            for(var i=0;i<numberOfEnemies;i++){
+                arrayInimigos.push(new PlayerInimigo(
+                    Math.random()*(canvas.width-50), 
+                    Math.random()*(canvas.height-50), 33, 48, 0, 0, 10, healthEnemy, "inimigo3.png", []));
+                }
+
+            if(portallvl.nivel==3){
+                arrayInimigos.push(new PlayerInimigo(
+                    Math.random()*(canvas.width-50), 
+                    Math.random()*(canvas.height-50), 33, 48, 0, 0, 20, healthEnemy, "boss.png", []));
+                }
+        }
+
+        ctx.drawImage(portalImage, 0, 0, portallvl.width, portallvl.height,
+            portallvl.x, portallvl.y, portallvl.width, portallvl.height);
+
+    };
 }
 
 //Executa
