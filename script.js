@@ -29,9 +29,9 @@ var projectilesEnemy = [];
 const portallvl = {
     nivel: 1,
     x: 730,
-    y: 250,
-    width:39,
-    height:70,
+    y: 200,
+    width:70,
+    height:125,
 };
 
 var ctxPlayer = canvas.getContext("2d");
@@ -301,7 +301,7 @@ function movePlayer(){
     }
 }
 var portalImage = new Image();
-portalImage.src = "Portal2.png";
+portalImage.src = "Portal.png";
 
 function collision(playerProjectiles){
     arrayInimigos.some((enemy)=>{
@@ -366,6 +366,7 @@ function collision(playerProjectiles){
                 //medium
                 case '2':
                     healthEnemy=10;
+                    // boss no final nivel
                     if(portallvl.nivel==3)
                         numberOfEnemies=1;
                     else
