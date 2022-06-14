@@ -5,18 +5,23 @@ body {
 
 .h1 {
     color: orange;
-    
+    text-shadow: 1px 1px 1px red,
+               2px 2px 1px red;
 }
 
 .h2 {
     color: orange;
+    
+}
+
+#Nivel {
+    font-family: fantasy;
 }
 
 #canvas1 {
     width: 800px;
     height: 500px;
     border: 1ox solid black;
-    /*background: orange;*/
     background-image: url(ArenaMC.png);
     position: absolute;
     top: 50%;
