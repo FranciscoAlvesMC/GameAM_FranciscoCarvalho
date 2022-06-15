@@ -3,8 +3,7 @@
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 canvas.width = 800;
-canvas.height = 500;
-this.fontFamily = 'fantasy';             // estilo de letras nao esta a funcionar
+canvas.height = 500;        
 
 const keys = [];
 var dir = 0;
@@ -15,13 +14,17 @@ const danoPow= new Image();
 danoPow.src = "POW.png";
 
 var arrayInimigos = [];
-
+var arrayCure = [];
+var cureNumber=1;
 var difficultyMode;
 
 const playerSprite= new Image();
 playerSprite.src = "girl.png";
 const background = new Image();
-background.src = "background.png";
+background.src = "ArenaMC.png";
+background.onload = function(){
+    ctx.drawImage(background,0,0);   
+}
 
 //adicionar inimigos e pode alterar o nº de inimigos
 var numberOfEnemies;
@@ -35,6 +38,19 @@ const portallvl = {
     height:125,
 };
 
+class cure {
+    constructor(x=100+Math.random()*(canvas.width-150), y=100+Math.random()*(canvas.height-150), 
+    width=70, height=125, health=8) {
+        var image = new Image();
+        this.x = x;
+        this.y = y;
+        this.health = health;
+        this.width = width;
+        this.height = height;
+        this.image = image;
+        this.image.src = "cure.png";
+    }
+};
 var ctxPlayer = canvas.getContext("2d");
 const player = {
     x: 50,
@@ -47,6 +63,8 @@ const player = {
     health:20,
 };
 var portalImage = new Image();
+var cureImage = new Image();
+cureImage.src="cure.png";
 portalImage.src = "Portal.png";
 var atraso = 35;
 var init=0;
@@ -81,6 +99,7 @@ function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
 }
 
 function animate(){
+    
     if(init==0)
     {  
         let text;
@@ -98,9 +117,12 @@ function animate(){
     }
 
     init++;
+    //limpa tela
     ctx.clearRect(0,0,canvas.width, canvas.height);
+    //desenha background
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
     drawSprite(playerSprite, 48*player.frameX, 48*player.frameY, player.width, player.height, player.x, player.y, player.width, player.height);
-    
     
     ctxPlayer.font = "15px Arial";
     ctxPlayer.fillStyle = "white";
@@ -161,7 +183,6 @@ function animate(){
                      inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));
                 }
                      inimigo.delay--;
-                     console.log('delay '+ inimigo.delay);
             };
             
 
@@ -329,7 +350,7 @@ function collision(playerProjectiles){
 
     if(arrayInimigos.length == 0 && portallvl.nivel == 3) {
         //Fim do ultimo nivel
-        if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!!")) {
+        if (window.confirm("YOU WIN!!!! <> Ganhou o Jogo!!!! --- A sua pontuação é: " + score)) {
             document.getElementById("Resultado").innerHTML = "Fim do Jogo!";
           } else {
             document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
@@ -357,6 +378,17 @@ function collision(playerProjectiles){
             portallvl.x, portallvl.y, portallvl.width, portallvl.height);
 
     };
+
+    arrayCure.some((cureA)=>{
+        if(getDistance(player.x, player.y, cureA.x, cureA.y) < cureA.height/2 + player.width/2){
+            console.log('apanhou cure');
+            player.health += cureA.health;
+            arrayCure.splice(arrayCure.indexOf(cureA),1);
+        }
+
+        ctx.drawImage(cureA.image, 0, 0, cureA.width, cureA.height,
+            cureA.x, cureA.y, cureA.width, cureA.height);
+    });
 }
 
 //Executa
@@ -364,10 +396,19 @@ animate();
 
 function generateMonsters() {
     var imageInimigo = "inimigo3.png";
-
+    arrayCure.splice(0,10);
     if (portallvl.nivel == 2 || portallvl.nivel == 3) {
+        background.src='ArenaMC_2.png';
+        if(portallvl.nivel == 3)
+            background.src='ArenaMC_3.png';
+            
         imageInimigo = "Mago.png";
+       
+       for(var u=0;u<cureNumber;u++){
+        arrayCure.push(new cure());
+       }
     }
+    
 
     switch (difficultyMode) {
         //medium
@@ -410,8 +451,9 @@ function generateMonsters() {
     player.y=50;
 
     for(var i=0;i<numberOfEnemies;i++){
-        arrayInimigos.push(new PlayerInimigo(
-            100+Math.random()*(canvas.width-150), 
-            100+Math.random()*(canvas.height-150), 33, 48, 0, 0, 10, healthEnemy, imageInimigo, []));
+        var x1 =100+Math.random()*(canvas.width-150);
+        var y1 =100+Math.random()*(canvas.height-150);
+        arrayInimigos.push(new PlayerInimigo(x1, 
+            y1, 33, 48, 0, 0, 10, healthEnemy, imageInimigo, []));
         }
 }
