@@ -2,6 +2,7 @@
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
+
 canvas.width = 800;
 canvas.height = 500;        
 
@@ -10,6 +11,7 @@ var dir = 0;
 const playerProjectiles = [];
 var score=0;
 var delay=10;
+
 const danoPow= new Image();
 danoPow.src = "POW.png";
 
@@ -51,7 +53,9 @@ class cure {
         this.image.src = "cure.png";
     }
 };
+
 var ctxPlayer = canvas.getContext("2d");
+
 const player = {
     x: 50,
     y: 50,
@@ -64,8 +68,10 @@ const player = {
 };
 var portalImage = new Image();
 var cureImage = new Image();
+
 cureImage.src="cure.png";
 portalImage.src = "Portal.png";
+
 var atraso = 35;
 var init=0;
 var healthEnemy;
@@ -166,9 +172,9 @@ function animate(){
                   
                 if(inimigo.delay == atraso) {  
                     if(player.x >= inimigo.x)
-                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 1, 0));
+                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 1, 0));  //Direita
                     else
-                      inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, -1, 0));
+                      inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, -1, 0));  //Esquerda
                 }
                       inimigo.delay--;
             }; 
@@ -178,9 +184,9 @@ function animate(){
 
                 if(inimigo.delay == atraso) {
                   if( player.y >= inimigo.y)
-                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, 1));
+                    inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, 1));  //Cima
                     else
-                     inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));
+                     inimigo.projectiles.push(new Projectile(inimigo.x, inimigo.y, 0, -1));  //Baixo
                 }
                      inimigo.delay--;
             };
@@ -213,6 +219,7 @@ function animate(){
 function getDistance(x1, y1, x2, y2){
     let xDistance = x2 - x1;
     let yDistance = y2 - y1;
+
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 }
 
@@ -355,6 +362,7 @@ function collision(playerProjectiles){
           } else {
             document.getElementById("Resultado").innerHTML = "Cancelou o jogo.....";
           }
+
     }else if(arrayInimigos.length == 0){
         //Fim nivel e aparece porta
        
@@ -447,13 +455,16 @@ function generateMonsters() {
 
             break;
     }
+
     player.x=50;
     player.y=50;
 
     for(var i=0;i<numberOfEnemies;i++){
         var x1 =100+Math.random()*(canvas.width-150);
         var y1 =100+Math.random()*(canvas.height-150);
+
         arrayInimigos.push(new PlayerInimigo(x1, 
             y1, 33, 48, 0, 0, 10, healthEnemy, imageInimigo, []));
         }
+
 }
